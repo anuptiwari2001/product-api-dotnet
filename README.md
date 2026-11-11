@@ -1,28 +1,54 @@
-# 🛒 Product API - .NET
+# Mango.Services.ProductAPI
 
-A RESTful Product API built with .NET demonstrating advanced API setup, 
-clean architecture, and industry best practices.
+A .NET 10 ASP.NET Core Web API for reading product data. It uses Entity Framework Core with SQL Server, AutoMapper, and Swagger/OpenAPI.
 
-## 🚀 Features
-- CRUD operations for Products
-- RESTful API design
-- Advanced .NET configuration
-- Clean code architecture
+## Features
 
-## 🛠️ Tech Stack
-- .NET / .NET Core
-- C#
-- REST API
+- List products
+- Retrieve a product by ID
+- Entity Framework Core SQL Server persistence
+- Swagger UI for API exploration
 
-## 📦 Getting Started
+> The current API is read-only. Create, update, and delete HTTP endpoints are not implemented.
 
-### Prerequisites
-- .NET SDK installed
-- Visual Studio or VS Code
+## API Endpoints
 
-### Run the Project
-```bash
-git clone https://github.com/yourusername/product-api-dotnet.git
-cd product-api-dotnet
+| Method | Endpoint | Description |
+| --- | --- | --- |
+| `GET` | `/api/products` | Returns the product list. |
+| `GET` | `/api/products/{id}` | Returns a product by ID, or `404` if it does not exist. |
+
+Product records include `ProductId`, `Name`, `Description`, `CategoryName`, `Price`, and `ImageUrl`.
+
+## Requirements
+
+- .NET 10 SDK
+- SQL Server
+
+## Configuration
+
+Configure the `ConnectionStrings:DefaultConnection` setting for a SQL Server instance that is available to your environment. Do not commit credentials or other secrets. You can override the setting using the `ConnectionStrings__DefaultConnection` environment variable.
+
+For example, in PowerShell:
+
+```powershell
+$env:ConnectionStrings__DefaultConnection = "Server=localhost;Database=MangoProductAPI;Trusted_Connection=True;TrustServerCertificate=True"
+```
+
+## Run Locally
+
+From the project directory:
+
+```powershell
 dotnet restore
-dotnet run
+dotnet ef database update
+dotnet run --launch-profile https
+```
+
+If the `dotnet ef` command is unavailable, install the EF Core CLI tool:
+
+```powershell
+dotnet tool install --global dotnet-ef
+```
+
+The HTTPS launch profile uses `https://localhost:7132`. In Development, Swagger UI is available at [https://localhost:7132/swagger](https://localhost:7132/swagger).
