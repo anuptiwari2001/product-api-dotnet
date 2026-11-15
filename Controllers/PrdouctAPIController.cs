@@ -34,6 +34,24 @@ namespace Mango.Services.ProductAPI.Controllers
                 });
             }
         }
+        [HttpPost]
+        public async Task<ActionResult<ResponseDto>> Post([FromBody] ProductDto productDto)
+        {
+            try
+            {
+                var createdProduct = await _productRepository.CreateUpdateProduct(productDto);
+                return CreatedAtAction(nameof(GetById), new { id = createdProduct.ProductId }, new ResponseDto { Result = createdProduct });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new ResponseDto
+                {
+                    IsSuccess = false,
+                    Result = Array.Empty<ProductDto>(),
+                    ErrorMessages = new List<string> { ex.ToString() }
+                });
+            }
+        }
 
         [HttpGet("{id:int}")]
         public async Task<ActionResult<ResponseDto>> GetById(int id)
@@ -51,6 +69,56 @@ namespace Mango.Services.ProductAPI.Controllers
                     Result = Array.Empty<ProductDto>(),
                     ErrorMessages = new List<string> { ex.Message }
                 });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new ResponseDto
+                {
+                    IsSuccess = false,
+                    Result = Array.Empty<ProductDto>(),
+                    ErrorMessages = new List<string> { ex.ToString() }
+                });
+            }
+        }
+
+        [HttpPut]
+        public async Task<ActionResult<ResponseDto>> Put([FromBody] ProductDto productDto)
+        {
+            try
+            {
+                var updatedProduct = await _productRepository.CreateUpdateProduct(productDto);
+                return Ok(new ResponseDto { Result = updatedProduct });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new ResponseDto
+                {
+                    IsSuccess = false,
+                    Result = Array.Empty<ProductDto>(),
+                    ErrorMessages = new List<string> { ex.ToString() }
+                });
+            }
+        }
+
+        [HttpDelete("{id:int}")]
+        public async Task<ActionResult<ResponseDto>> Delete(int id)
+        {
+            try
+            {
+                var isDeleted = await _productRepository.DeleteProduct(id);
+                if (isDeleted)
+                {
+                    return Ok(new ResponseDto { Result = $"Product with ID {id} deleted successfully." });
+                }
+                else
+                {
+                    return NotFound(new ResponseDto
+                    {
+                        IsSuccess = false,
+                        Result = Array.Empty<ProductDto>(),
+                        ErrorMessages = new List<string> { $"Product with ID {id} not found." }
+                    });
+                }
             }
             catch (Exception ex)
             {
