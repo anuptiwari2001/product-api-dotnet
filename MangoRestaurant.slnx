@@ -3,6 +3,7 @@
     <Project Path="Mango.Web/Mango.Web.csproj" />
   </Folder>
   <Folder Name="/Services/">
+    <Project Path="Mango.Services.Identity/Mango.Services.Identity.csproj" Id="11e3ee21-36ce-457d-9545-0a05d66515fc" />
     <Project Path="Mango.Services.ProductAPI/Mango.Services.ProductAPI.csproj" />
   </Folder>
 </Solution>

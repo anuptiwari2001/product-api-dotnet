@@ -1,0 +1,15 @@
+﻿@{
+    ViewData["Title"] = "Mango Identity";
+}
+
+<div class="text-center">
+    <h1 class="display-4">Mango Identity</h1>
+    <p>Secure sign-in and account services for Mango applications.</p>
+    @if (User.Identity?.IsAuthenticated != true)
+    {
+        <p>
+            <a class="btn btn-primary" asp-controller="Account" asp-action="Login">Sign in</a>
+            <a class="btn btn-outline-primary" asp-controller="Account" asp-action="Register">Create an account</a>
+        </p>
+    }
+</div>

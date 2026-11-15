@@ -1,0 +1,66 @@
+﻿@model IEnumerable<ProductDto>
+@{
+    ViewData["Title"] = "Products";
+}
+
+<div class="container p-4 border">
+    <div class="row pb-2">
+        <div class="col">
+            <h1 class="text-primary">Products List</h1>
+        </div>
+        <div class="col text-end pt-1">
+            <a asp-action="Create" class="btn btn-outline-primary">
+                <i class="fas fa-plus"></i> Create New Product
+            </a>
+        </div>
+    </div>
+    <div asp-validation-summary="All" class="text-danger"></div>
+    @if (TempData["Success"] is string successMessage)
+    {
+        <div class="alert alert-success" role="alert">@successMessage</div>
+    }
+    @if (TempData["Error"] is string errorMessage)
+    {
+        <div class="alert alert-danger" role="alert">@errorMessage</div>
+    }
+
+    @if (!Model.Any())
+    {
+        <p>No products are currently available.</p>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Category Name</th>
+                        <th>Price</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var product in Model)
+                    {
+                        <tr>
+                            <td>@product.Name</td>
+                            <td>@product.CategoryName</td>
+                            <td>@product.Price.ToString("C2")</td>
+                            <td class="text-nowrap">
+                                <a asp-action="Edit" asp-route-id="@product.ProductId" class="btn btn-success btn-sm" aria-label="Edit @product.Name">
+                                    <i class="fas fa-edit" aria-hidden="true"></i>
+                                </a>
+                                <form asp-action="Delete" asp-route-id="@product.ProductId" method="post" class="d-inline">
+                                    <button type="submit" class="btn btn-danger btn-sm" aria-label="Delete @product.Name" onclick="return confirm('Delete this product?');">
+                                        <i class="fas fa-trash" aria-hidden="true"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>

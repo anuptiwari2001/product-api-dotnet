@@ -1,0 +1,20 @@
+@model Mango.Services.Identity.MainModule.Account.LoggedOutViewModel
+@{
+    ViewData["Title"] = "Signed out";
+}
+
+<div class="text-center">
+    <h1 class="h3">You are signed out</h1>
+    @if (!string.IsNullOrWhiteSpace(Model.ClientName))
+    {
+        <p>You have signed out of @Model.ClientName.</p>
+    }
+    @if (!string.IsNullOrWhiteSpace(Model.PostLogoutRedirectUri))
+    {
+        <p><a class="btn btn-primary" href="@Model.PostLogoutRedirectUri">Return to the application</a></p>
+    }
+    @if (!string.IsNullOrWhiteSpace(Model.SignOutIframeUrl))
+    {
+        <iframe title="Sign-out notifications" src="@Model.SignOutIframeUrl" class="d-none"></iframe>
+    }
+</div>

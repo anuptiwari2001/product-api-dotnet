@@ -1,0 +1,15 @@
+@model Mango.Services.Identity.MainModule.Account.LoginViewModel
+@if (Model.ExternalProviders.Count > 0)
+{
+    <div class="mt-4">
+        <h2 class="h6">Or sign in with</h2>
+        @foreach (var provider in Model.ExternalProviders)
+        {
+            <a class="btn btn-outline-secondary me-2 mb-2"
+               asp-controller="External"
+               asp-action="Challenge"
+               asp-route-authenticationScheme="@provider.AuthenticationScheme"
+               asp-route-returnUrl="@Model.Input.ReturnUrl">@provider.DisplayName</a>
+        }
+    </div>
+}

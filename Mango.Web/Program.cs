@@ -6,7 +6,17 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 var services = builder.Services;
-services.AddHttpClient<IProductService, ProductService>();
+services.AddHttpClient("MangoAPI", client =>
+{
+    client.Timeout = TimeSpan.FromSeconds(10);
+})
+.ConfigurePrimaryHttpMessageHandler(() => new SocketsHttpHandler
+{
+    // Local API calls must not go through a system proxy, or Products sits and waits.
+    UseProxy = false,
+    ConnectTimeout = TimeSpan.FromSeconds(3)
+});
+services.AddScoped<IProductService, ProductService>();
 SD.ProductAPIBase = builder.Configuration["ServiceUrls:ProductAPI"] ?? SD.ProductAPIBase;
 services.AddControllersWithViews().AddRazorRuntimeCompilation();
 

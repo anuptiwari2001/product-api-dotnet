@@ -8,7 +8,7 @@ namespace Mango.Web.Services
         public ProductService(IHttpClientFactory httpClient) : base(httpClient)
         {
         }
-        public async Task<T> CreateProductAsync<T>(ProductDto productDto, string token)
+        public async Task<T> CreateProductAsync<T>(ProductDto productDto, string token) where T : ResponseDto, new()
         {
             return await SendAsync<T>(new ApiRequest()
             {
@@ -18,7 +18,7 @@ namespace Mango.Web.Services
                 AccessToken = token
             });
         }
-        public async Task<T> DeleteProductAsync<T>(int id, string token)
+        public async Task<T> DeleteProductAsync<T>(int id, string token) where T : ResponseDto, new()
         {
             return await SendAsync<T>(new ApiRequest()
             {
@@ -27,7 +27,7 @@ namespace Mango.Web.Services
                 AccessToken = token
             });
         }
-        public async Task<T> GetAllProductsAsync<T>(string token)
+        public async Task<T> GetAllProductsAsync<T>(string token) where T : ResponseDto, new()
         {
             return await SendAsync<T>(new ApiRequest()
             {
@@ -36,7 +36,7 @@ namespace Mango.Web.Services
                 AccessToken = token
             });
         }
-        public async Task<T> GetAllProductsAsync<T>(string token, string categoryName)
+        public async Task<T> GetAllProductsAsync<T>(string token, string categoryName) where T : ResponseDto, new()
         {
             return await SendAsync<T>(new ApiRequest()
             {
@@ -45,7 +45,7 @@ namespace Mango.Web.Services
                 AccessToken = token
             });
         }
-        public async Task<T> GetProductByIdAsync<T>(int id, string token)
+        public async Task<T> GetProductByIdAsync<T>(int id, string token) where T : ResponseDto, new()
         {
             return await SendAsync<T>(new ApiRequest()
             {
@@ -54,7 +54,7 @@ namespace Mango.Web.Services
                 AccessToken = token
             });
         }
-        public async Task<T> UpdateProductAsync<T>(ProductDto productDto, string token)
+        public async Task<T> UpdateProductAsync<T>(ProductDto productDto, string token) where T : ResponseDto, new()
         {
             return await SendAsync<T>(new ApiRequest()
             {

@@ -1,0 +1,28 @@
+@model Mango.Services.Identity.MainModule.Account.LogoutViewModel
+@{
+    ViewData["Title"] = "Sign out";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-6 text-center">
+        <h1 class="h3">Sign out</h1>
+        @if (Model.ShowSignoutPrompt)
+        {
+            <p>Are you sure you want to sign out@(string.IsNullOrWhiteSpace(Model.ClientName) ? "" : $" of {Model.ClientName}")?</p>
+            <form asp-action="Logout" method="post">
+                <input type="hidden" name="LogoutId" value="@Model.LogoutId" />
+                <input type="hidden" name="ReturnUrl" value="@Model.PostLogoutRedirectUri" />
+                <button type="submit" class="btn btn-primary">Sign out</button>
+                <a asp-controller="Home" asp-action="Index" class="btn btn-outline-secondary">Cancel</a>
+            </form>
+        }
+        else
+        {
+            <form asp-action="Logout" method="post">
+                <input type="hidden" name="LogoutId" value="@Model.LogoutId" />
+                <input type="hidden" name="ReturnUrl" value="@Model.PostLogoutRedirectUri" />
+                <button type="submit" class="btn btn-primary">Continue</button>
+            </form>
+        }
+    </div>
+</div>
