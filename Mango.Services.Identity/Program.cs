@@ -1,5 +1,6 @@
 using System.Security.Cryptography.X509Certificates;
 using Duende.IdentityServer;
+using Mango.Services.Identity;
 using Mango.Services.Identity.DbContexts;
 using Mango.Services.Identity.MainModule.Account;
 using Mango.Services.Identity.Models;
@@ -28,6 +29,13 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddDefaultTokenProviders();
 
+var serviceClientSecret = builder.Configuration["IdentityServer:Clients:ServiceSecret"];
+if (string.IsNullOrWhiteSpace(serviceClientSecret))
+{
+    throw new InvalidOperationException(
+        "Configure IdentityServer:Clients:ServiceSecret with the client-credentials secret.");
+}
+
 var identityServer = builder.Services.AddIdentityServer(options =>
 {
     options.Events.RaiseErrorEvents = true;
@@ -36,9 +44,9 @@ var identityServer = builder.Services.AddIdentityServer(options =>
     options.Events.RaiseSuccessEvents = true;
     options.EmitStaticAudienceClaim = true;
 })
-.AddInMemoryIdentityResources(IdentityConfiguration.IdentityResources)
-.AddInMemoryApiScopes(IdentityConfiguration.ApiScopes)
-.AddInMemoryClients(IdentityConfiguration.Clients)
+.AddInMemoryIdentityResources(SD.IdentityResources)
+.AddInMemoryApiScopes(SD.ApiScopes)
+.AddInMemoryClients(SD.Clients(serviceClientSecret))
 .AddAspNetIdentity<ApplicationUser>();
 
 if (builder.Environment.IsDevelopment())
@@ -78,7 +86,7 @@ var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {
     var database = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-    database.Database.EnsureCreated();
+    database.Database.Migrate();
 }
 
 if (!app.Environment.IsDevelopment())
