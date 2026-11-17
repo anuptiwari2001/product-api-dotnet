@@ -2,6 +2,7 @@ using System.Security.Cryptography.X509Certificates;
 using Duende.IdentityServer;
 using Mango.Services.Identity;
 using Mango.Services.Identity.DbContexts;
+using Mango.Services.Identity.Initializer;
 using Mango.Services.Identity.MainModule.Account;
 using Mango.Services.Identity.Models;
 using Microsoft.AspNetCore.Identity;
@@ -72,6 +73,7 @@ else
     identityServer.AddSigningCredential(certificate);
 }
 
+builder.Services.AddScoped<IDbInitializer, DbInitializer>();
 builder.Services.Configure<AccountOptions>(builder.Configuration.GetSection("Account"));
 builder.Services.ConfigureApplicationCookie(options =>
 {
@@ -87,6 +89,12 @@ using (var scope = app.Services.CreateScope())
 {
     var database = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
     database.Database.Migrate();
+
+    if (app.Environment.IsDevelopment())
+    {
+        var initializer = scope.ServiceProvider.GetRequiredService<IDbInitializer>();
+        await initializer.InitializeAsync();
+    }
 }
 
 if (!app.Environment.IsDevelopment())

@@ -1,12 +1,14 @@
 ﻿using Mango.Services.ProductAPI.DbContexts.Models.Dto;
 using Mango.Services.ProductAPI.DbContexts.Models.Dtos;
 using Mango.Services.ProductAPI.Repository;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Mango.Services.ProductAPI.Controllers
 {
     [Route("api/products")]
     [ApiController]
+    [Authorize(Policy = "ApiScope")]
     public class ProductAPIController : ControllerBase
     {
         private readonly IProductRepository _productRepository;
@@ -100,7 +102,9 @@ namespace Mango.Services.ProductAPI.Controllers
             }
         }
 
-        [HttpDelete("{id:int}")]
+        [HttpDelete]
+        [Authorize(Roles = "Admin")]
+        [Route("{id}")]
         public async Task<ActionResult<ResponseDto>> Delete(int id)
         {
             try

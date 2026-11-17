@@ -5,3 +5,6 @@
 **/*.suo
 **/appsettings.Local.json
 **/appsettings.*.local.json
+.playwright-mcp/
+Mango.Services.Identity/keys/
+Mango.Services.Identity/tempkey.jwk

@@ -19,7 +19,7 @@ namespace Mango.Services.Identity
         public static IEnumerable<ApiScope> ApiScopes =>
             new List<ApiScope>
             {
-                new ApiScope("mango", "Mango Server"),
+                new ApiScope("mango", "Mango Server", new[] { "role" }),
                 new ApiScope("read", "Read your data."),
                 new ApiScope("write", "Write your data."),
                 new ApiScope("delete", "Delete your data.")
@@ -56,6 +56,24 @@ namespace Mango.Services.Identity
                         "mango"
                     },
                     AllowAccessTokensViaBrowser = false
+                },
+                new Client
+                {
+                    ClientId = "swagger",
+                    ClientName = "Mango Product API Swagger",
+                    AllowedGrantTypes = GrantTypes.Code,
+                    RequirePkce = true,
+                    RequireClientSecret = false,
+                    RequireConsent = false,
+                    RedirectUris = { "https://localhost:7132/swagger/oauth2-redirect.html" },
+                    AllowedCorsOrigins = { "https://localhost:7132" },
+                    AllowedScopes =
+                    {
+                        IdentityServerConstants.StandardScopes.OpenId,
+                        IdentityServerConstants.StandardScopes.Profile,
+                        IdentityServerConstants.StandardScopes.Email,
+                        "mango"
+                    }
                 }
             };
         }
