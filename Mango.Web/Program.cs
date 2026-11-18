@@ -1,6 +1,8 @@
 using Mango.Web;
 using Mango.Web.Services;
 using Mango.Web.Services.iServices;
+using Microsoft.IdentityModel.Protocols.OpenIdConnect;
+using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,6 +20,40 @@ services.AddHttpClient("MangoAPI", client =>
 });
 services.AddScoped<IProductService, ProductService>();
 SD.ProductAPIBase = builder.Configuration["ServiceUrls:ProductAPI"] ?? SD.ProductAPIBase;
+
+var identityAuthority = builder.Configuration["ServiceUrls:IdentityAPI"];
+if (string.IsNullOrWhiteSpace(identityAuthority))
+{
+    throw new InvalidOperationException("ServiceUrls:IdentityAPI must be configured.");
+}
+
+services.AddAuthentication(options =>
+{
+    options.DefaultScheme = "Cookies";
+    options.DefaultChallengeScheme = "oidc";
+})
+.AddCookie("Cookies", options =>
+{
+    options.ExpireTimeSpan = TimeSpan.FromMinutes(10);
+})
+.AddOpenIdConnect("oidc", options =>
+{
+    options.Authority = identityAuthority.TrimEnd('/');
+    options.ClientId = "mango";
+    options.ResponseType = OpenIdConnectResponseType.Code;
+    options.UsePkce = true;
+    options.SaveTokens = true;
+    options.GetClaimsFromUserInfoEndpoint = true;
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        NameClaimType = "name",
+        RoleClaimType = "role"
+    };
+    options.Scope.Add("profile");
+    options.Scope.Add("email");
+    options.Scope.Add("mango");
+});
+services.AddAuthorization();
 services.AddControllersWithViews().AddRazorRuntimeCompilation();
 
 var app = builder.Build();
@@ -33,6 +69,7 @@ if (!app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseRouting();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapStaticAssets();

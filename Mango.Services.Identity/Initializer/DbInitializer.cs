@@ -123,6 +123,13 @@ namespace Mango.Services.Identity.Initializer
                     var updateResult = await _userManager.UpdateAsync(user);
                     EnsureSucceeded(updateResult, $"update the {role} seed user");
                 }
+
+                if (!await _userManager.CheckPasswordAsync(user, password))
+                {
+                    var resetToken = await _userManager.GeneratePasswordResetTokenAsync(user);
+                    var resetResult = await _userManager.ResetPasswordAsync(user, resetToken, password);
+                    EnsureSucceeded(resetResult, $"set the configured password for the {role} seed user");
+                }
             }
 
             if (!await _userManager.IsInRoleAsync(user, role))

@@ -19,11 +19,18 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
 
+var identityServerAuthority = builder.Configuration["IdentityServer:Authority"];
+if (string.IsNullOrWhiteSpace(identityServerAuthority))
+{
+    throw new InvalidOperationException("IdentityServer:Authority must be configured.");
+}
+
+var identityServerBaseUri = identityServerAuthority.TrimEnd('/') + "/";
 builder.Services
     .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, options =>
     {
-        options.Authority = "https://localhost:7187/";
+        options.Authority = identityServerBaseUri;
         options.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateAudience = false,
@@ -57,8 +64,8 @@ builder.Services.AddSwaggerGen(options =>
         {
             AuthorizationCode = new OpenApiOAuthFlow
             {
-                AuthorizationUrl = new Uri("https://localhost:7187/connect/authorize"),
-                TokenUrl = new Uri("https://localhost:7187/connect/token"),
+                AuthorizationUrl = new Uri($"{identityServerBaseUri}connect/authorize"),
+                TokenUrl = new Uri($"{identityServerBaseUri}connect/token"),
                 Scopes = new Dictionary<string, string>
                 {
                     ["openid"] = "Sign in",

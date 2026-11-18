@@ -1,4 +1,5 @@
 ﻿using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
 using Mango.Web.Models;
@@ -28,6 +29,11 @@ namespace Mango.Web.Services.iServices
                     }
                 };
                 message.Headers.Accept.ParseAdd("application/json");
+                if (!string.IsNullOrWhiteSpace(apiRequest.AccessToken))
+                {
+                    message.Headers.Authorization = new AuthenticationHeaderValue("Bearer", apiRequest.AccessToken);
+                }
+
                 if (apiRequest.Data is not null)
                 {
                     message.Content = new StringContent(JsonSerializer.Serialize(apiRequest.Data, JsonOptions), Encoding.UTF8, "application/json");
@@ -43,7 +49,7 @@ namespace Mango.Web.Services.iServices
                 if (!apiResponse.IsSuccessStatusCode)
                 {
                     response.IsSuccess = false;
-                    if (response.ErrorMessages is not { Count: > 0 } && string.IsNullOrWhiteSpace(response.DisplayMessage))
+                    if (response.ErrorMessages is not { Count: > 0 })
                     {
                         response.DisplayMessage = $"The Product API returned HTTP {(int)apiResponse.StatusCode} ({apiResponse.ReasonPhrase}).";
                     }
