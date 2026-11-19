@@ -12,9 +12,13 @@ namespace Mango.Services.Identity.MainModule.Account;
 public sealed class AccountController(
     UserManager<ApplicationUser> userManager,
     SignInManager<ApplicationUser> signInManager,
+    RoleManager<IdentityRole> roleManager,
     IIdentityServerInteractionService interactionService,
     IOptions<AccountOptions> accountOptions) : Controller
 {
+    private readonly UserManager<ApplicationUser> _userManager = userManager;
+    private readonly SignInManager<ApplicationUser> _signInManager = signInManager;
+    private readonly RoleManager<IdentityRole> _roleManager = roleManager;
     private AccountOptions Options => accountOptions.Value;
 
     [HttpGet]
@@ -36,12 +40,33 @@ public sealed class AccountController(
             return View(await BuildLoginViewModelAsync(input.ReturnUrl, input));
         }
 
-        var result = await signInManager.PasswordSignInAsync(
+        var result = await _signInManager.PasswordSignInAsync(
             input.Email, input.Password, input.RememberMe && Options.AllowRememberLogin, lockoutOnFailure: true);
 
         if (result.Succeeded)
         {
-            return RedirectToLocal(input.ReturnUrl);
+            var user = await _userManager.FindByNameAsync(input.Email);
+            await RaiseEventAsync(
+                new UserLoginSuccessEvent(user.UserName, user.Id, user.FirstName + " " + user.LastName,
+                    clientId: HttpContext.Connection.RemoteIpAddress?.ToString() ?? "Unknown"));
+
+            if (interactionService != null)
+            {
+                return Redirect(input.ReturnUrl);
+            }
+
+            if (Url.IsLocalUrl(input.ReturnUrl))
+            {
+                return Redirect(input.ReturnUrl);
+            }
+            else if (string.IsNullOrEmpty(input.ReturnUrl))
+            {
+                return Redirect("~/");
+            }
+            else
+            {
+                throw new Exception("invalid return url");
+            }
         }
 
         var error = result.IsLockedOut
@@ -84,7 +109,7 @@ public sealed class AccountController(
             LastName = input.LastName
         };
 
-        var result = await userManager.CreateAsync(user, input.Password);
+        var result = await _userManager.CreateAsync(user, input.Password);
         if (!result.Succeeded)
         {
             foreach (var error in result.Errors)
@@ -95,7 +120,7 @@ public sealed class AccountController(
             return View(input);
         }
 
-        await signInManager.SignInAsync(user, isPersistent: false);
+        await _signInManager.SignInAsync(user, isPersistent: false);
         return RedirectToLocal(input.ReturnUrl);
     }
 
@@ -120,7 +145,7 @@ public sealed class AccountController(
         var context = await interactionService.GetLogoutContextAsync(input.LogoutId, HttpContext.RequestAborted);
         if (User.Identity?.IsAuthenticated == true)
         {
-            await signInManager.SignOutAsync();
+            await _signInManager.SignOutAsync();
         }
 
         var returnUrl = context?.PostLogoutRedirectUri ?? GetValidReturnUrl(input.ReturnUrl);
@@ -140,7 +165,7 @@ public sealed class AccountController(
     private async Task<LoginViewModel> BuildLoginViewModelAsync(
         string? returnUrl, LoginInputModel? input = null, string? error = null)
     {
-        var externalProviders = await signInManager.GetExternalAuthenticationSchemesAsync();
+        var externalProviders = await _signInManager.GetExternalAuthenticationSchemesAsync();
         return new LoginViewModel
         {
             Input = input ?? new LoginInputModel { ReturnUrl = GetValidReturnUrl(returnUrl) },
@@ -165,4 +190,11 @@ public sealed class AccountController(
         !string.IsNullOrWhiteSpace(returnUrl) && Url.IsLocalUrl(returnUrl)
             ? Redirect(returnUrl)
             : RedirectToAction("Index", "Home");
+
+    private Task RaiseEventAsync(UserLoginSuccessEvent evt)
+    {
+        // Event handling can be implemented here if an event service is available
+        // For now, this is a placeholder for event tracking/logging
+        return Task.CompletedTask;
+    }
 }
